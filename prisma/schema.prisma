@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum EntryType {
+  MANHWA
+  MANHUA
+  LIGHT_NOVEL
+  WESTERN
+}
+
+enum EntryStatus {
+  CURRENT
+  COMPLETED
+}
+
+model Entry {
+  id            String       @id @default(cuid())
+  title         String
+  titleLower    String       @default("")
+  baseTitle     String       @default("")
+  baseTitleLower String      @default("")
+  descriptor    String?
+  descriptorLower String     @default("")
+  type          EntryType
+  status        EntryStatus?
+  chaptersRead  Int?
+  totalChapters Int?
+  score         Float?
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  altTitles     AltTitle[]
+
+  @@unique([title, type])
+  @@index([titleLower])
+  @@index([baseTitleLower])
+  @@index([title])
+}
+
+model AltTitle {
+  id             String  @id @default(cuid())
+  entryId        String
+  title          String
+  titleLower     String  @default("")
+  entry          Entry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@unique([entryId, titleLower])
+  @@index([titleLower])
+}
