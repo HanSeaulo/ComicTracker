@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PwaRegister } from "@/components/PwaRegister";
 import { Signature } from "@/components/Signature";
 import "./globals.css";
 
@@ -64,6 +65,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}
       >
         <ThemeProvider />
+        <PwaRegister />
         {children}
         <Signature />
       </body>
