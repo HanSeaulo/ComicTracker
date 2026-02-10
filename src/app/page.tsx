@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { EntryStatus, EntryType } from "@prisma/client";
+import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { EntryFilters } from "@/components/EntryFilters";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ChapterButtons } from "@/components/ChapterButtons";
@@ -52,19 +52,20 @@ export default async function Home({
   const type = parseFilter(resolvedParams.type, Object.values(EntryType));
   const sort = resolvedParams.sort ?? "title";
 
-  const whereClause: Parameters<typeof db.entry.findMany>[0]["where"] = {
+  const whereClause: Prisma.EntryWhereInput = {
     status: status ?? undefined,
     type: type ?? undefined,
+    ...(queryLower
+      ? {
+          OR: [
+            { titleLower: { contains: queryLower } },
+            { baseTitleLower: { contains: queryLower } },
+            { descriptorLower: { contains: queryLower } },
+            { altTitles: { some: { titleLower: { contains: queryLower } } } },
+          ],
+        }
+      : {}),
   };
-
-  if (queryLower) {
-    whereClause.OR = [
-      { titleLower: { contains: queryLower } },
-      { baseTitleLower: { contains: queryLower } },
-      { descriptorLower: { contains: queryLower } },
-      { altTitles: { some: { titleLower: { contains: queryLower } } } },
-    ];
-  }
 
   const orderBy =
     sort === "updated"
