@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Signature } from "@/components/Signature";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +17,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ComicTracker",
   description: "Track manhwa, manhua, and novels with Prisma + SQLite.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "ComicTracker",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/icons/icon-192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b1220",
 };
 
 const themeScript = `
@@ -51,6 +65,7 @@ export default function RootLayout({
       >
         <ThemeProvider />
         {children}
+        <Signature />
       </body>
     </html>
   );
