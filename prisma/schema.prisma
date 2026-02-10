@@ -23,6 +23,18 @@ enum EntryStatus {
   COMPLETED
 }
 
+enum ImportStatus {
+  SUCCESS
+  FAILED
+}
+
+enum ActivityAction {
+  IMPORT_RUN
+  ENTRY_CREATED
+  ENTRY_UPDATED
+  ENTRY_DELETED
+}
+
 model Entry {
   id            String       @id @default(cuid())
   title         String
@@ -41,6 +53,7 @@ model Entry {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   altTitles     AltTitle[]
+  activityLogs  ActivityLog[]
 
   @@unique([title, type])
   @@index([titleLower])
@@ -58,4 +71,34 @@ model AltTitle {
 
   @@unique([entryId, titleLower])
   @@index([titleLower])
+}
+
+model ImportRun {
+  id           String       @id @default(cuid())
+  createdAt    DateTime     @default(now())
+  filename     String
+  totalRows    Int
+  uniqueKeys   Int
+  duplicates   Int
+  createdCount Int
+  updatedCount Int
+  durationMs   Int
+  status       ImportStatus
+  error        String?
+
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id        String         @id @default(cuid())
+  createdAt DateTime       @default(now())
+  action    ActivityAction
+  entryId   String?
+  entry     Entry?         @relation(fields: [entryId], references: [id], onDelete: SetNull)
+  changes   Json?
+  message   String?
+  source    String?
+
+  @@index([createdAt])
+  @@index([entryId])
 }

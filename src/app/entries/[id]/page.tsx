@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { EntryStatus, EntryType } from "@prisma/client";
+import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { addAltTitle } from "@/app/actions";
 import { DeleteEntryButton, RemoveAltTitleButton } from "@/components/EntryDeleteActions";
 import { ChapterButtons } from "@/components/ChapterButtons";
@@ -24,6 +24,50 @@ function formatDate(date: Date | null) {
   return date.toISOString().slice(0, 10);
 }
 
+function formatValue(value: unknown) {
+  if (value === null || value === undefined) return "--";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.join(", ");
+  if (value instanceof Date) return value.toISOString();
+  return JSON.stringify(value);
+}
+
+function renderChanges(changes: Prisma.JsonValue | null) {
+  if (!changes || typeof changes !== "object" || Array.isArray(changes)) return null;
+  const entries = Object.entries(changes as Record<string, unknown>);
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="mt-2 grid gap-1 text-xs text-slate-500 dark:text-slate-400">
+      {entries.map(([key, value]) => {
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          const valueObj = value as Record<string, unknown>;
+          if ("from" in valueObj || "to" in valueObj) {
+            return (
+              <div key={key}>
+                {key}: {formatValue(valueObj.from)} {"->"} {formatValue(valueObj.to)}
+              </div>
+            );
+          }
+          if ("added" in valueObj || "removed" in valueObj) {
+            return (
+              <div key={key}>
+                {key}: +{formatValue(valueObj.added)} -{formatValue(valueObj.removed)}
+              </div>
+            );
+          }
+        }
+        return (
+          <div key={key}>
+            {key}: {formatValue(value)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default async function EntryDetailPage({
   params,
 }: {
@@ -35,6 +79,12 @@ export default async function EntryDetailPage({
     include: { altTitles: { orderBy: { title: "asc" } } },
   });
   if (!entry) return notFound();
+
+  const recentChanges = await db.activityLog.findMany({
+    where: { entryId: entry.id },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -142,6 +192,37 @@ export default async function EntryDetailPage({
           </dl>
         </div>
 
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Recent Changes
+            </h2>
+            <Link className="text-xs font-semibold text-slate-600 dark:text-slate-300" href="/activity">
+              View all
+            </Link>
+          </div>
+          <div className="mt-4 space-y-3">
+            {recentChanges.length === 0 && (
+              <div className="text-sm text-slate-500 dark:text-slate-400">No recent changes for this entry.</div>
+            )}
+            {recentChanges.map((log) => (
+              <div
+                key={log.id}
+                className="rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:text-slate-200"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <span>{log.createdAt.toLocaleString()}</span>
+                  <span>{log.action.replace("_", " ")}</span>
+                </div>
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                  {log.message ?? "Updated entry"}
+                </div>
+                {renderChanges(log.changes)}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <Link className="mt-6 inline-flex text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
           Back to list
         </Link>
@@ -149,3 +230,8 @@ export default async function EntryDetailPage({
     </div>
   );
 }
+
+
+
+
+
