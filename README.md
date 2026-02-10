@@ -1,54 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ComicTracker
 
-## Getting Started (Postgres)
+ComicTracker is a personal library tracker for manhwa, manga, and light novels.
+
+It lets you import your library from XLSX, track chapters read, scores, and reading status, and keep everything synced in a Postgres database.
+
+## Features
+
+- 📥 Import entries from XLSX
+- 🔁 Pre-deduped imports with merge rules (no accidental overwrites)
+- 📚 Track chapters read, total chapters, score, and status
+- 🏷️ Alternate title parsing with parenthesis exceptions (e.g. “(Remake)”)
+- 🗂️ Separate tracking by type (Manhwa / Manga / Light Novel)
+- 🧮 Clear import summary (created / updated / duplicates)
+- ⚡ Built with Next.js App Router, Prisma, and Postgres (Neon)
+
+---
+
+## Getting Started (Local Development)
 
 ### 1) Configure environment variables
 
-Create or update `.env`:
+Create a `.env` file in the project root:
 
-```
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME?schema=public"
 DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME?schema=public"
-```
 
 Notes:
-- For **Neon**, `DATABASE_URL` should be the pooled connection string and `DIRECT_URL` the non-pooled string for migrations.
-- For **Supabase**, use the connection string Supabase provides. `DIRECT_URL` can be the same as `DATABASE_URL` if you don't have a separate direct connection.
+- Neon:
+  - DATABASE_URL → pooled connection string
+  - DIRECT_URL → non-pooled connection (used for migrations)
+- Supabase:
+  - You may use the same value for both if no separate direct URL is provided.
 
-### 2) Apply schema and generate client
+---
 
-```bash
+### 2) Apply schema and generate Prisma client
+
+Run:
+
 npx prisma migrate dev --name init
 npx prisma generate
-```
+
+---
 
 ### 3) Run the dev server
 
-```bash
 npm run dev
-```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open http://localhost:3000
 
-## Common commands
+---
 
-```bash
+## Common Commands
+
+npm run dev
 npx prisma migrate dev
 npx prisma generate
-npm run dev
-```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment (Vercel + Neon)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push this repository to GitHub
+2. Create a new project on https://vercel.com
+3. Import the GitHub repository
+4. Set environment variables in Vercel:
+   - DATABASE_URL (Neon pooled connection)
+   - DIRECT_URL (Neon direct connection)
+5. Ensure Prisma runs at build time:
+   - Add "postinstall": "prisma generate" to package.json
+6. Deploy 🎉
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Production migrations:
 
-## Deploy on Vercel
+npx prisma migrate deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+- Next.js (App Router)
+- Prisma ORM
+- Postgres (Neon)
+- Vercel (hosting)
+
+---
+
+## License
+
+This project is currently unlicensed and intended for personal use.
