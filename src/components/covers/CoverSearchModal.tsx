@@ -48,13 +48,20 @@ export function CoverSearchModal({
   if (!open) return null;
 
   const search = async () => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setResults([]);
+      setError("Enter at least 2 characters to search.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const response = await fetch("/api/anilist/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: trimmed }),
       });
       const payload = (await response.json().catch(() => null)) as
         | { results?: CoverSearchResult[]; error?: string }
@@ -89,16 +96,32 @@ export function CoverSearchModal({
             </Button>
           </div>
 
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <form
+            className="mb-4 flex flex-col gap-2 sm:flex-row"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void search();
+            }}
+          >
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search AniList title"
             />
-            <Button variant="primary" onClick={search} loading={isLoading}>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isLoading}
+              disabled={query.trim().length < 2}
+            >
               Search
             </Button>
-          </div>
+          </form>
+          {query.trim().length < 2 ? (
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+              Enter at least 2 characters to search AniList.
+            </div>
+          ) : null}
 
           {error ? (
             <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200">

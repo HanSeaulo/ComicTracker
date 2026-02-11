@@ -66,6 +66,25 @@ export async function setEntryCoverAndSourceTitles(entryId: string, payload: Cov
   revalidatePath(`/entries/${entryId}`);
 }
 
+export async function clearEntryCoverAndSourceTitles(entryId: string) {
+  await requireAuth();
+
+  await db.entry.update({
+    where: { id: entryId },
+    data: {
+      coverImageUrl: null,
+      coverSource: null,
+      coverSourceId: null,
+      coverFetchedAt: null,
+      sourceTitlesJson: null,
+      sourceTitlesAt: null,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/entries/${entryId}`);
+}
+
 export async function applySourceTitlesToAltTitles(entryId: string, selectedTitles: string[]) {
   await requireAuth();
 

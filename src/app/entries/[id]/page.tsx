@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { EntryCoverTools } from "@/components/covers/EntryCoverTools";
+import { EntrySourceTitlesSection } from "@/components/covers/EntrySourceTitlesSection";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -193,12 +194,7 @@ export default async function EntryDetailPage({
             </div>
           </dl>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-            <EntryCoverTools
-              entryId={entry.id}
-              entryTitle={entry.title}
-              sourceTitlesJson={entry.sourceTitlesJson}
-            />
+          <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-700 sm:gap-3">
             <Link
               className={buttonClasses({ variant: "secondary" })}
               href={`/entries/${entry.id}/edit`}
@@ -206,8 +202,15 @@ export default async function EntryDetailPage({
               Edit
             </Link>
             <DeleteEntryButton entryId={entry.id} className={buttonClasses({ variant: "destructive" })} />
+            <EntryCoverTools
+              entryId={entry.id}
+              entryTitle={entry.title}
+              hasCover={Boolean(entry.coverImageUrl)}
+            />
           </div>
         </Card>
+
+        <EntrySourceTitlesSection entryId={entry.id} sourceTitlesJson={entry.sourceTitlesJson} />
 
         <Card className="mt-6 p-4 sm:p-6">
           <div className="flex items-center justify-between">
