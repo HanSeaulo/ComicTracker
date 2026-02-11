@@ -1,8 +1,14 @@
-import Link from "next/link";
 import { db } from "@/lib/db";
-import { EntryStatus } from "@prisma/client";
-import { ChapterButtons } from "@/components/ChapterButtons";
+import { EntryStatus, EntryType } from "@prisma/client";
 import { AppHeader } from "@/components/AppHeader";
+import { EntryListRow } from "@/components/EntryListRow";
+
+const typeLabels: Record<EntryType, string> = {
+  MANHWA: "Manhwa",
+  MANHUA: "Manhua",
+  LIGHT_NOVEL: "Light Novel",
+  WESTERN: "Western",
+};
 
 export default async function UpdatesPage() {
   const recentEntries = await db.entry.findMany({
@@ -19,28 +25,19 @@ export default async function UpdatesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-4xl px-6 py-10">
+      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <AppHeader title="Latest Updates" showBack />
 
         <div className="space-y-3">
           {sorted.map((entry) => (
-            <div
+            <EntryListRow
               key={entry.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
-            >
-              <div>
-                <Link
-                  className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
-                  href={`/entries/${entry.id}`}
-                >
-                  {entry.title}
-                </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
-                </p>
-              </div>
-              <ChapterButtons entryId={entry.id} currentChapters={entry.chaptersRead} />
-            </div>
+              entryId={entry.id}
+              title={entry.title}
+              subtitle={`${typeLabels[entry.type]} - ${entry.status ?? "Unknown"} - ${entry.chaptersRead ?? "--"} / ${entry.totalChapters ?? "--"}`}
+              chaptersRead={entry.chaptersRead}
+              coverImageUrl={entry.coverImageUrl}
+            />
           ))}
         </div>
       </div>

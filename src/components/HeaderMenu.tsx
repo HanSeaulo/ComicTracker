@@ -106,6 +106,9 @@ export function HeaderMenu() {
           <Link href="/import" role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
             Import .xlsx
           </Link>
+          <a href="/api/export/xlsx" download role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
+            Export .xlsx
+          </a>
           <Link href="/imports" role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
             Import history
           </Link>

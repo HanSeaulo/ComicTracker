@@ -120,8 +120,8 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
       <Card className="space-y-6 p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-          <p>Upload a .xlsx file with sheets named Manhwa, Manhua, LightNovel, or Western.</p>
-          <p>Columns: Title, Status (CR/COM), Chapters Read, Total Chapters, Score, Start Date, End Date.</p>
+          <p>Supported formats: legacy MyChapterList sheet-per-type and ComicTracker Export v2.</p>
+          <p>Legacy sheets: Manhwa, Manhua, LightNovel, or Western. Export v2: single "ComicTracker Export" sheet.</p>
         </div>
 
         <div className="space-y-3">

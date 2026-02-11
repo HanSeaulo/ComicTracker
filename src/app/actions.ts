@@ -23,6 +23,12 @@ type ParsedEntry = {
   score: number | null;
   startDate: Date | null;
   endDate: Date | null;
+  coverImageUrl?: string | null;
+  coverSource?: string | null;
+  coverSourceId?: number | null;
+  coverFetchedAt?: Date | null;
+  sourceTitlesJson?: string | null;
+  sourceTitlesAt?: Date | null;
 };
 
 const ACTIVITY_LOG_LIMIT = 1000;
@@ -215,6 +221,206 @@ function parseTitleParts(rawTitle: string) {
     descriptor: null as string | null,
     altTitles: [] as string[],
   };
+}
+
+type ParsedImportRow = {
+  rowNumber: number;
+  entry: ParsedEntry;
+};
+
+function isHttpUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parsePipeSeparatedTitles(value: unknown, mainTitle: string) {
+  const mainKey = mainTitle.toLowerCase().trim();
+  const map = new Map<string, string>();
+  const raw = normalizeString(value);
+  if (!raw) return [];
+  for (const part of raw.split("|")) {
+    const normalized = normalizeTitleValue(part);
+    const key = normalized.toLowerCase().trim();
+    if (!key || key === mainKey) continue;
+    if (!map.has(key)) {
+      map.set(key, normalized);
+    }
+  }
+  return [...map.values()];
+}
+
+function isV2ExportWorkbook(workbook: XLSX.WorkBook) {
+  const sheet = workbook.Sheets["ComicTracker Export"];
+  if (!sheet) return false;
+  const a2 = normalizeString(sheet["A2"]?.v);
+  const b2 = normalizeString(sheet["B2"]?.v);
+  if (a2 !== "Version" || b2 !== "2") return false;
+
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+    header: 1,
+    raw: true,
+    defval: null,
+  });
+  const headers = (rows[3] ?? []).map((cell) => normalizeString(cell) ?? "");
+  const required = ["Type", "Title", "Chapters Read"];
+  return required.every((header) => headers.includes(header));
+}
+
+function parseLegacyWorkbookRows(workbook: XLSX.WorkBook) {
+  let skippedCount = 0;
+  const rowsByKey = new Map<string, ParsedImportRow[]>();
+
+  for (const sheetName of workbook.SheetNames) {
+    const entryType = normalizeRowType(sheetName);
+    if (!entryType) continue;
+    const sheet = workbook.Sheets[sheetName];
+    if (!sheet) continue;
+
+    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+      defval: null,
+      raw: true,
+    });
+
+    for (const [index, row] of rows.entries()) {
+      const rawTitle = normalizeString(row["Title"]);
+      if (!rawTitle) {
+        skippedCount += 1;
+        continue;
+      }
+
+      const { mainTitle, altTitles } = parseImportedTitle(rawTitle, PAREN_KEEP_KEYWORDS);
+      const title = normalizeTitleValue(mainTitle);
+      const titleLower = title.toLowerCase().trim();
+
+      const data: ParsedEntry = {
+        title,
+        titleLower,
+        baseTitle: title,
+        baseTitleLower: titleLower,
+        descriptor: null,
+        descriptorLower: "",
+        altTitles,
+        type: entryType,
+        status: parseStatus(row["Status (CR/COM)"] ?? row["Status"]),
+        chaptersRead: parseIntOrNull(row["Chapters Read"]),
+        totalChapters: parseIntOrNull(row["Total Chapters"]),
+        score: parseScore(row["Score"]),
+        startDate: parseExcelDate(row["Start Date"]),
+        endDate: parseExcelDate(row["End Date"]),
+      };
+
+      const uniqueKey = `${data.type}::${data.titleLower}`;
+      const group = rowsByKey.get(uniqueKey) ?? [];
+      group.push({ rowNumber: index + 2, entry: data });
+      rowsByKey.set(uniqueKey, group);
+    }
+  }
+
+  return { rowsByKey, skippedCount };
+}
+
+function parseV2WorkbookRows(workbook: XLSX.WorkBook) {
+  let skippedCount = 0;
+  const rowsByKey = new Map<string, ParsedImportRow[]>();
+  const sheet = workbook.Sheets["ComicTracker Export"];
+  if (!sheet) return { rowsByKey, skippedCount };
+
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+    header: 1,
+    raw: true,
+    defval: null,
+  });
+  const headers = (rows[3] ?? []) as unknown[];
+  const headerIndex = new Map<string, number>();
+  for (let i = 0; i < headers.length; i += 1) {
+    const key = normalizeString(headers[i]);
+    if (key) headerIndex.set(key, i);
+  }
+
+  const getCell = (row: unknown[], header: string) => {
+    const index = headerIndex.get(header);
+    if (index === undefined) return null;
+    return row[index] ?? null;
+  };
+
+  for (let rowIndex = 4; rowIndex < rows.length; rowIndex += 1) {
+    const row = (rows[rowIndex] ?? []) as unknown[];
+    const titleRaw = normalizeString(getCell(row, "Title"));
+    if (!titleRaw) break;
+
+    const type = parseEntryType(getCell(row, "Type"));
+    if (!type) {
+      skippedCount += 1;
+      continue;
+    }
+
+    const title = normalizeTitleValue(titleRaw);
+    const titleLower = title.toLowerCase().trim();
+    const now = new Date();
+    const coverImageRaw = normalizeString(getCell(row, "Cover Image URL"));
+    const coverImageUrl = coverImageRaw && isHttpUrl(coverImageRaw) ? coverImageRaw : null;
+    const coverSourceRaw = normalizeString(getCell(row, "Cover Source"));
+    const coverSource = coverSourceRaw === "ANILIST" && coverImageUrl ? "ANILIST" : null;
+    const coverSourceIdRaw = parseIntOrNull(getCell(row, "Cover Source ID"));
+    const coverSourceId = coverSource && typeof coverSourceIdRaw === "number" ? coverSourceIdRaw : null;
+    const sourceTitlesRaw = normalizeString(getCell(row, "Source Titles JSON"));
+    let sourceTitlesJson: string | null = null;
+    if (sourceTitlesRaw) {
+      try {
+        JSON.parse(sourceTitlesRaw);
+        sourceTitlesJson = sourceTitlesRaw;
+      } catch {
+        sourceTitlesJson = null;
+      }
+    }
+
+    const data: ParsedEntry = {
+      title,
+      titleLower,
+      baseTitle: title,
+      baseTitleLower: titleLower,
+      descriptor: null,
+      descriptorLower: "",
+      altTitles: parsePipeSeparatedTitles(getCell(row, "Alt Titles"), title),
+      type,
+      status: parseStatus(getCell(row, "Status")) ?? EntryStatus.CURRENT,
+      chaptersRead: parseIntOrNull(getCell(row, "Chapters Read")),
+      totalChapters: parseIntOrNull(getCell(row, "Total Chapters")),
+      score: parseScore(getCell(row, "Score")),
+      startDate: parseExcelDate(getCell(row, "Start Date")),
+      endDate: parseExcelDate(getCell(row, "End Date")),
+      coverImageUrl: coverImageUrl ?? undefined,
+      coverSource: coverSource ?? undefined,
+      coverSourceId: coverSourceId ?? undefined,
+      coverFetchedAt: coverImageUrl ? now : undefined,
+      sourceTitlesJson: sourceTitlesJson ?? undefined,
+      sourceTitlesAt: sourceTitlesJson ? now : undefined,
+    };
+
+    const uniqueKey = `${data.type}::${data.titleLower}`;
+    const group = rowsByKey.get(uniqueKey) ?? [];
+    group.push({ rowNumber: rowIndex + 1, entry: data });
+    rowsByKey.set(uniqueKey, group);
+  }
+
+  return { rowsByKey, skippedCount };
+}
+
+function canCollapseChapterLog(changes: Prisma.JsonValue | null) {
+  if (!changes || typeof changes !== "object" || Array.isArray(changes)) return null;
+  const asObj = changes as Record<string, unknown>;
+  const keys = Object.keys(asObj);
+  if (keys.length !== 1 || keys[0] !== "chaptersRead") return null;
+  const chapterObj = asObj.chaptersRead;
+  if (!chapterObj || typeof chapterObj !== "object" || Array.isArray(chapterObj)) return null;
+  const from = (chapterObj as Record<string, unknown>).from;
+  const to = (chapterObj as Record<string, unknown>).to;
+  if (typeof from !== "number" || typeof to !== "number") return null;
+  return { from, to };
 }
 
 function parseEntryFromForm(formData: FormData): ParsedEntry {
@@ -479,15 +685,40 @@ export async function incrementChapters(entryId: string, delta: number) {
       data: { chaptersRead: next },
     });
 
-    await createActivityLog(tx, {
-      action: ActivityAction.ENTRY_UPDATED,
-      entry: { connect: { id: entryId } },
-      changes: {
-        chaptersRead: { from: currentValue, to: next },
-      } as ActivityChanges,
+    const recentWindowStart = new Date(Date.now() - 20_000);
+    const latestChapterLog = await tx.activityLog.findFirst({
+      where: {
+        entryId,
+        action: ActivityAction.ENTRY_UPDATED,
+        source: "chapters",
+        createdAt: { gte: recentWindowStart },
+      },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, changes: true },
+    });
+
+    const collapsed = canCollapseChapterLog(latestChapterLog?.changes ?? null);
+    if (latestChapterLog && collapsed) {
+      await tx.activityLog.update({
+        where: { id: latestChapterLog.id },
+        data: {
+          changes: {
+            chaptersRead: { from: collapsed.from, to: next },
+          } as ActivityChanges,
+          message: `Updated chapters for ${current.title}`,
+        },
+      });
+    } else {
+      await createActivityLog(tx, {
+        action: ActivityAction.ENTRY_UPDATED,
+        entry: { connect: { id: entryId } },
+        changes: {
+          chaptersRead: { from: currentValue, to: next },
+        } as ActivityChanges,
         message: `Updated chapters for ${current.title}`,
         source: "chapters",
-    });
+      });
+    }
 
     return { from: currentValue, to: next };
   });
@@ -537,56 +768,11 @@ export async function importEntries(formData: FormData): Promise<ImportResult> {
     let duplicateCount = 0;
     const updateLogs: string[] = [];
     const debug = process.env.IMPORT_DEBUG === "1";
-    const rowsByKey = new Map<string, { rowNumber: number; entry: ParsedEntry }[]>();
-
-    for (const sheetName of workbook.SheetNames) {
-      const entryType = normalizeRowType(sheetName);
-      if (!entryType) continue;
-      const sheet = workbook.Sheets[sheetName];
-      if (!sheet) continue;
-
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-        defval: null,
-        raw: true,
-      });
-
-      for (const [index, row] of rows.entries()) {
-        const rawTitle = normalizeString(row["Title"]);
-        if (!rawTitle) {
-          skippedCount += 1;
-          continue;
-        }
-        const { mainTitle, altTitles } = parseImportedTitle(rawTitle, PAREN_KEEP_KEYWORDS);
-        const title = normalizeTitleValue(mainTitle);
-        const titleLower = title.toLowerCase().trim();
-        const baseTitle = title;
-        const baseTitleLower = titleLower;
-        const descriptor = null;
-
-        const data: ParsedEntry = {
-          title,
-          titleLower,
-          baseTitle,
-          baseTitleLower,
-          descriptor,
-          descriptorLower: "",
-          altTitles,
-          type: entryType,
-          status: parseStatus(row["Status (CR/COM)"] ?? row["Status"]),
-          chaptersRead: parseIntOrNull(row["Chapters Read"]),
-          totalChapters: parseIntOrNull(row["Total Chapters"]),
-          score: parseScore(row["Score"]),
-          startDate: parseExcelDate(row["Start Date"]),
-          endDate: parseExcelDate(row["End Date"]),
-        };
-
-        const uniqueKey = `${data.type}::${data.titleLower}`;
-        const rowNumber = index + 2;
-        const group = rowsByKey.get(uniqueKey) ?? [];
-        group.push({ rowNumber, entry: data });
-        rowsByKey.set(uniqueKey, group);
-      }
-    }
+    const parseResult = isV2ExportWorkbook(workbook)
+      ? parseV2WorkbookRows(workbook)
+      : parseLegacyWorkbookRows(workbook);
+    const rowsByKey = parseResult.rowsByKey;
+    skippedCount = parseResult.skippedCount;
 
     duplicateCount = Math.max(
       0,
@@ -639,6 +825,14 @@ export async function importEntries(formData: FormData): Promise<ImportResult> {
       const status = mergeStatus(groups);
       const { earliestStart, latestEnd } = mergeDates(groups);
       const altTitles = mergeAltTitles(groups);
+      const latestWithCover = [...groups]
+        .reverse()
+        .map((row) => row.entry)
+        .find((entry) => entry.coverImageUrl);
+      const latestWithSourceTitles = [...groups]
+        .reverse()
+        .map((row) => row.entry)
+        .find((entry) => entry.sourceTitlesJson);
       return {
         ...first,
         chaptersRead: chaptersRead || null,
@@ -648,6 +842,12 @@ export async function importEntries(formData: FormData): Promise<ImportResult> {
         startDate: earliestStart,
         endDate: status === EntryStatus.COMPLETED ? latestEnd : first.endDate ?? latestEnd,
         altTitles,
+        coverImageUrl: latestWithCover?.coverImageUrl ?? first.coverImageUrl,
+        coverSource: latestWithCover?.coverSource ?? first.coverSource,
+        coverSourceId: latestWithCover?.coverSourceId ?? first.coverSourceId,
+        coverFetchedAt: latestWithCover?.coverFetchedAt ?? first.coverFetchedAt,
+        sourceTitlesJson: latestWithSourceTitles?.sourceTitlesJson ?? first.sourceTitlesJson,
+        sourceTitlesAt: latestWithSourceTitles?.sourceTitlesAt ?? first.sourceTitlesAt,
       };
     };
 
