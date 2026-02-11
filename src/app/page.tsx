@@ -192,6 +192,7 @@ export default async function Home({
               statusLabel={entry.status ? statusLabels[entry.status] : "Unknown"}
               chaptersRead={entry.chaptersRead}
               totalChapters={entry.totalChapters}
+              coverImageUrl={entry.coverImageUrl}
             />
           ))}
         </div>

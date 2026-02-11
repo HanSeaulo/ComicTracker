@@ -50,6 +50,12 @@ model Entry {
   score         Float?
   startDate     DateTime?
   endDate       DateTime?
+  coverImageUrl String?
+  coverSource   String?
+  coverSourceId Int?
+  coverFetchedAt DateTime?
+  sourceTitlesJson String?
+  sourceTitlesAt DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   altTitles     AltTitle[]

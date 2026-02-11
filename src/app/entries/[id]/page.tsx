@@ -10,6 +10,7 @@ import { Button, buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { EntryCoverTools } from "@/components/covers/EntryCoverTools";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -96,6 +97,20 @@ export default async function EntryDetailPage({
         <AppHeader title={entry.title} showBack />
 
         <Card className="p-4 sm:p-6">
+          <div className="mb-4">
+            {entry.coverImageUrl ? (
+              <img
+                src={entry.coverImageUrl}
+                alt={`${entry.title} cover`}
+                className="h-44 w-32 rounded-xl border border-slate-200 object-cover dark:border-slate-700"
+              />
+            ) : (
+              <div className="flex h-44 w-32 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-100 text-3xl font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
+                {entry.title.slice(0, 1).toUpperCase()}
+              </div>
+            )}
+          </div>
+
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</dt>
@@ -179,6 +194,11 @@ export default async function EntryDetailPage({
           </dl>
 
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <EntryCoverTools
+              entryId={entry.id}
+              entryTitle={entry.title}
+              sourceTitlesJson={entry.sourceTitlesJson}
+            />
             <Link
               className={buttonClasses({ variant: "secondary" })}
               href={`/entries/${entry.id}/edit`}
