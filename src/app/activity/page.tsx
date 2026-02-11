@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { db } from "@/lib/db";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 import { ActivityAction, Prisma } from "@prisma/client";
 
 function formatValue(value: unknown) {
@@ -64,21 +62,7 @@ export default async function ActivityPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Activity Log</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
-              Back to list
-            </Link>
-          </div>
-        </div>
+        <AppHeader title="Activity Log" showBack />
 
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <div className="grid grid-cols-12 gap-3 border-b border-slate-100 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:text-slate-400">

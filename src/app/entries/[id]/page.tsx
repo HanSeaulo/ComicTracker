@@ -5,8 +5,7 @@ import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { addAltTitle } from "@/app/actions";
 import { DeleteEntryButton, RemoveAltTitleButton } from "@/components/EntryDeleteActions";
 import { ChapterButtons } from "@/components/ChapterButtons";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -90,25 +89,21 @@ export default async function EntryDetailPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-3xl px-6 py-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{entry.title}</h1>
-          </div>
-          <div className="flex gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
-              href={`/entries/${entry.id}/edit`}
-            >
-              Edit
-            </Link>
-            <DeleteEntryButton entryId={entry.id} />
-          </div>
-        </div>
+        <AppHeader
+          title={entry.title}
+          showBack
+          actions={
+            <>
+              <Link
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+                href={`/entries/${entry.id}/edit`}
+              >
+                Edit
+              </Link>
+              <DeleteEntryButton entryId={entry.id} />
+            </>
+          }
+        />
 
         <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
           <dl className="grid gap-4 md:grid-cols-2">
@@ -225,9 +220,6 @@ export default async function EntryDetailPage({
           </div>
         </section>
 
-        <Link className="mt-6 inline-flex text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
-          Back to list
-        </Link>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { EntryFilters } from "@/components/EntryFilters";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ChapterButtons } from "@/components/ChapterButtons";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 
 type SearchParams = {
   q?: string;
@@ -122,32 +122,26 @@ export default async function Home({
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-              Library
-            </h1>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
-              href="/import"
-            >
-              Import .xlsx
-            </Link>
-            <Link
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
-              href="/entries/new"
-            >
-              Add Entry
-            </Link>
-          </div>
-        </header>
+        <AppHeader
+          title="Library"
+          actions={
+            <>
+              <ThemeToggle />
+              <Link
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+                href="/import"
+              >
+                Import .xlsx
+              </Link>
+              <Link
+                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                href="/entries/new"
+              >
+                Add Entry
+              </Link>
+            </>
+          }
+        />
 
         <EntryFilters />
 

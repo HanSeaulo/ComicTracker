@@ -2,8 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { EntryStatus } from "@prisma/client";
 import { ChapterButtons } from "@/components/ChapterButtons";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 
 export default async function UpdatesPage() {
   const recentEntries = await db.entry.findMany({
@@ -21,23 +20,7 @@ export default async function UpdatesPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-4xl px-6 py-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-              Latest Updates
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
-              Back to library
-            </Link>
-          </div>
-        </div>
+        <AppHeader title="Latest Updates" showBack />
 
         <div className="space-y-3">
           {sorted.map((entry) => (

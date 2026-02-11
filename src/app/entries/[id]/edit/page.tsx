@@ -1,10 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { EntryForm } from "@/components/EntryForm";
 import { updateEntry } from "@/app/actions";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 
 export default async function EditEntryPage({
   params,
@@ -18,21 +16,7 @@ export default async function EditEntryPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-3xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Edit Entry</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href={`/entries/${entry.id}`}>
-              Back to details
-            </Link>
-          </div>
-        </div>
+        <AppHeader title="Edit Entry" showBack />
 
         <EntryForm
           action={updateEntry.bind(null, entry.id)}

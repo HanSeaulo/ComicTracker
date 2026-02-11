@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { ImportForm } from "@/components/ImportForm";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AppHeader } from "@/components/AppHeader";
 
 export default async function ImportPage() {
   const lastImport = await db.importRun.findFirst({
@@ -27,24 +26,18 @@ export default async function ImportPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-2xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              ComicTracker
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Import Spreadsheet</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <LogoutButton />
-            <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/imports">
+        <AppHeader
+          title="Import Spreadsheet"
+          showBack
+          actions={
+            <Link
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              href="/imports"
+            >
               Import history
             </Link>
-            <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
-              Back to list
-            </Link>
-          </div>
-        </div>
+          }
+        />
 
         <ImportForm lastImport={lastImportSummary} />
       </div>
