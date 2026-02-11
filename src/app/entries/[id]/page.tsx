@@ -20,7 +20,7 @@ const statusLabels: Record<EntryStatus, string> = {
 };
 
 function formatDate(date: Date | null) {
-  if (!date) return "—";
+  if (!date) return "--";
   return date.toISOString().slice(0, 10);
 }
 
@@ -88,11 +88,11 @@ export default async function EntryDetailPage({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-3xl px-6 py-10">
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <AppHeader title={entry.title} showBack />
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
-          <dl className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</dt>
               <dd className="text-base font-semibold text-slate-900 dark:text-slate-100">{typeLabels[entry.type]}</dd>
@@ -133,7 +133,7 @@ export default async function EntryDetailPage({
               <dd className="text-base font-semibold text-slate-900 dark:text-slate-100">{formatDate(entry.endDate)}</dd>
             </div>
             {entry.altTitles.length > 0 && (
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Alternate Titles
                 </dt>
@@ -149,7 +149,7 @@ export default async function EntryDetailPage({
                 </dd>
               </div>
             )}
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2">
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Add Alternate Title
               </dt>
@@ -161,11 +161,11 @@ export default async function EntryDetailPage({
                   <input
                     name="altTitle"
                     placeholder="New alternate title"
-                    className="min-w-[240px] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="min-w-[220px] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                   <button
                     type="submit"
-                    className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                    className="h-11 rounded-full bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
                   >
                     Add
                   </button>
@@ -173,22 +173,19 @@ export default async function EntryDetailPage({
               </dd>
             </div>
           </dl>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <Link
+              className="inline-flex h-11 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              href={`/entries/${entry.id}/edit`}
+            >
+              Edit
+            </Link>
+            <DeleteEntryButton entryId={entry.id} />
+          </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            Actions
-          </p>
-          <Link
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
-            href={`/entries/${entry.id}/edit`}
-          >
-            Edit
-          </Link>
-          <DeleteEntryButton entryId={entry.id} />
-        </div>
-
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Recent Changes
@@ -218,13 +215,7 @@ export default async function EntryDetailPage({
             ))}
           </div>
         </section>
-
       </div>
     </div>
   );
 }
-
-
-
-
-

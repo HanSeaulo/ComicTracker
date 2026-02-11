@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { importEntries, type ImportResult } from "@/app/actions";
 
 type ImportSummary = ImportResult & {
@@ -10,6 +10,7 @@ type ImportSummary = ImportResult & {
 
 type ImportFormProps = {
   lastImport?: ImportSummary | null;
+  afterUpload?: ReactNode;
 };
 
 function formatBytes(size: number) {
@@ -30,7 +31,7 @@ function formatDuration(ms: number) {
   return `${minutes}m ${remainder}s`;
 }
 
-export function ImportForm({ lastImport }: ImportFormProps) {
+export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
   const [fileInfo, setFileInfo] = useState<{ name: string; size: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ImportSummary | null>(null);
@@ -98,7 +99,7 @@ export function ImportForm({ lastImport }: ImportFormProps) {
     <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900"
+        className="space-y-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900"
       >
         <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
           <p>Upload a .xlsx file with sheets named Manhwa, Manhua, LightNovel, or Western.</p>
@@ -117,16 +118,16 @@ export function ImportForm({ lastImport }: ImportFormProps) {
           />
           {fileInfo && (
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-              Selected: {fileInfo.name} · {formatBytes(fileInfo.size)}
+              Selected: {fileInfo.name} - {formatBytes(fileInfo.size)}
             </div>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto dark:bg-slate-100 dark:text-slate-900"
           >
             {isSubmitting ? (
               <>
@@ -141,12 +142,40 @@ export function ImportForm({ lastImport }: ImportFormProps) {
             type="button"
             onClick={handleCancel}
             disabled={!isSubmitting}
-            className="rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600"
+            className="h-11 w-full rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-700 hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600"
           >
             Cancel
           </button>
         </div>
       </form>
+
+      {afterUpload ? <div>{afterUpload}</div> : null}
+
+      {lastImport && (
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700 shadow-sm sm:px-5 sm:py-5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Last import
+          </div>
+          <div className="mt-2 grid gap-1">
+            <div>
+              {lastImport.createdAt ? new Date(lastImport.createdAt).toLocaleString() : "--"} - {lastImport.filename}
+            </div>
+            <div>
+              Status:{" "}
+              <span className={lastImport.status === "SUCCESS" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}>
+                {lastImport.status}
+              </span>
+            </div>
+            <div>Created: {lastImport.createdCount}</div>
+            <div>Updated: {lastImport.updatedCount}</div>
+            <div>Duplicates: {lastImport.duplicates}</div>
+            <div>Duration: {formatDuration(lastImport.durationMs)}</div>
+            {lastImport.status === "FAILED" && lastImport.error && (
+              <div className="text-rose-600 dark:text-rose-300">Error: {lastImport.error}</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-200">
@@ -164,33 +193,6 @@ export function ImportForm({ lastImport }: ImportFormProps) {
             <div>Total rows: {result.totalRows}</div>
             <div>Unique keys: {result.uniqueKeys}</div>
             <div>Duration: {formatDuration(result.durationMs)}</div>
-          </div>
-        </div>
-      )}
-
-      {lastImport && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Last import
-          </div>
-          <div className="mt-2 grid gap-1">
-            <div>
-              {lastImport.createdAt ? new Date(lastImport.createdAt).toLocaleString() : "--"} ·{" "}
-              {lastImport.filename}
-            </div>
-            <div>
-              Status:{" "}
-              <span className={lastImport.status === "SUCCESS" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}>
-                {lastImport.status}
-              </span>
-            </div>
-            <div>Created: {lastImport.createdCount}</div>
-            <div>Updated: {lastImport.updatedCount}</div>
-            <div>Duplicates: {lastImport.duplicates}</div>
-            <div>Duration: {formatDuration(lastImport.durationMs)}</div>
-            {lastImport.status === "FAILED" && lastImport.error && (
-              <div className="text-rose-600 dark:text-rose-300">Error: {lastImport.error}</div>
-            )}
           </div>
         </div>
       )}

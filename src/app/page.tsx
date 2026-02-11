@@ -3,8 +3,8 @@ import { db } from "@/lib/db";
 import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { EntryFilters } from "@/components/EntryFilters";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ChapterButtons } from "@/components/ChapterButtons";
 import { AppHeader } from "@/components/AppHeader";
+import { EntryRowCard } from "@/components/EntryRowCard";
 
 type SearchParams = {
   q?: string;
@@ -27,11 +27,6 @@ const statusLabels: Record<EntryStatus, string> = {
   CURRENT: "Current",
   COMPLETED: "Completed",
 };
-
-function formatDate(date: Date | null) {
-  if (!date) return "--";
-  return date.toISOString().slice(0, 10);
-}
 
 function parseFilter<T extends string>(value: unknown, values: T[]): T | null {
   if (typeof value !== "string") return null;
@@ -121,22 +116,22 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
-        <AppHeader
-          title="Library"
-        />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <AppHeader title="Library" />
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <ThemeToggle />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-fit">
+            <ThemeToggle />
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              className="inline-flex h-11 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
               href="/import"
             >
               Import .xlsx
             </Link>
             <Link
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+              className="inline-flex h-11 items-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
               href="/entries/new"
             >
               Add Entry
@@ -159,20 +154,17 @@ export default async function Home({
             {recentSorted.map((entry) => (
               <div
                 key={entry.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:text-slate-200"
+                className="rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:text-slate-200"
               >
-                <div>
-                  <Link
-                    className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
-                    href={`/entries/${entry.id}`}
-                  >
-                    {entry.title}
-                  </Link>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
-                  </p>
-                </div>
-                <ChapterButtons entryId={entry.id} />
+                <Link
+                  className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
+                  href={`/entries/${entry.id}`}
+                >
+                  {entry.title}
+                </Link>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
+                </p>
               </div>
             ))}
           </div>
@@ -184,51 +176,22 @@ export default async function Home({
           </div>
         )}
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-slate-900">
-          <div className="grid grid-cols-12 gap-3 border-b border-slate-100 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:text-slate-400">
-            <span className="col-span-4">Name</span>
-            <span className="col-span-3 text-right">Chapters</span>
-            <span className="col-span-1 text-right">Score</span>
-            <span className="col-span-2">Status</span>
-            <span className="col-span-2">Type</span>
-          </div>
+        <div className="space-y-3">
           {sortedEntries.length === 0 && (
-            <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+            <div className="rounded-2xl bg-white px-4 py-10 text-center text-sm text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-400">
               No entries yet. Add one or import a spreadsheet.
             </div>
           )}
           {sortedEntries.map((entry) => (
-            <div
+            <EntryRowCard
               key={entry.id}
-              className="grid grid-cols-12 gap-3 border-b border-slate-100 px-4 py-4 text-sm text-slate-700 last:border-b-0 dark:border-slate-800 dark:text-slate-200"
-            >
-              <div className="col-span-4">
-                <Link
-                  className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
-                  href={`/entries/${entry.id}`}
-                >
-                  {entry.title}
-                </Link>
-                {entry.startDate && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {formatDate(entry.startDate)} → {formatDate(entry.endDate)}
-                  </p>
-                )}
-              </div>
-              <div className="col-span-3 text-right">
-                <div className="flex flex-col items-end gap-2">
-                  <span>
-                    {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
-                  </span>
-                  <ChapterButtons entryId={entry.id} />
-                </div>
-              </div>
-              <div className="col-span-1 text-right">{entry.score ?? "--"}</div>
-              <div className="col-span-2">
-                {entry.status ? statusLabels[entry.status] : "Unknown"}
-              </div>
-              <div className="col-span-2">{typeLabels[entry.type]}</div>
-            </div>
+              entryId={entry.id}
+              title={entry.title}
+              typeLabel={typeLabels[entry.type]}
+              statusLabel={entry.status ? statusLabels[entry.status] : "Unknown"}
+              chaptersRead={entry.chaptersRead}
+              totalChapters={entry.totalChapters}
+            />
           ))}
         </div>
       </div>

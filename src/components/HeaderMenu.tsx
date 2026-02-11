@@ -46,9 +46,21 @@ export function HeaderMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Open menu"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg font-semibold leading-none text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
       >
-        <span aria-hidden="true">...</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-5 w-5"
+        >
+          <circle cx="12" cy="8" r="3.2" />
+          <path d="M5.5 19.5c1.3-3 3.9-4.5 6.5-4.5s5.2 1.5 6.5 4.5" />
+        </svg>
       </button>
 
       {open ? (
