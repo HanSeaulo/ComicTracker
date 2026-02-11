@@ -39,7 +39,7 @@ export default async function UpdatesPage() {
                   {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
                 </p>
               </div>
-              <ChapterButtons entryId={entry.id} />
+              <ChapterButtons entryId={entry.id} currentChapters={entry.chaptersRead} />
             </div>
           ))}
         </div>

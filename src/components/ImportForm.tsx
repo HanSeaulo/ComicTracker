@@ -3,6 +3,10 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { importEntries, type ImportResult } from "@/app/actions";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Label } from "@/components/ui/Label";
+import { useToast } from "@/components/ui/Toast";
 
 type ImportSummary = ImportResult & {
   createdAt?: string;
@@ -38,6 +42,7 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
   const [error, setError] = useState<string | null>(null);
   const canceledRef = useRef(false);
   const runIdRef = useRef(0);
+  const { toast } = useToast();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,12 +79,27 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
       if (runIdRef.current !== currentRun || canceledRef.current) return;
       if (response.status === "FAILED") {
         setError(response.error ?? "Import failed.");
+        toast({
+          title: "Import failed",
+          description: response.error ?? "Import failed.",
+          variant: "error",
+        });
       } else {
         setResult(response);
+        toast({
+          title: "Import complete",
+          description: `${response.createdCount} created, ${response.updatedCount} updated, ${response.duplicates} duplicates`,
+          variant: "success",
+        });
       }
     } catch (err) {
       if (runIdRef.current !== currentRun || canceledRef.current) return;
       setError(err instanceof Error ? err.message : "Import failed.");
+      toast({
+        title: "Import failed",
+        description: err instanceof Error ? err.message : "Import failed.",
+        variant: "error",
+      });
     } finally {
       if (runIdRef.current === currentRun && !canceledRef.current) {
         setIsSubmitting(false);
@@ -97,10 +117,8 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
 
   return (
     <div className="space-y-6">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900"
-      >
+      <Card className="space-y-6 p-4 sm:p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
           <p>Upload a .xlsx file with sheets named Manhwa, Manhua, LightNovel, or Western.</p>
           <p>Columns: Title, Status (CR/COM), Chapters Read, Total Chapters, Score, Start Date, End Date.</p>
@@ -124,38 +142,32 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <button
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto dark:bg-slate-100 dark:text-slate-900"
+            variant="primary"
+            loading={isSubmitting}
+            className="w-full sm:w-auto"
           >
-            {isSubmitting ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-slate-900 dark:border-t-transparent" />
-                Importing...
-              </>
-            ) : (
-              "Import Entries"
-            )}
-          </button>
-          <button
+            Import Entries
+          </Button>
+          <Button
             type="button"
             onClick={handleCancel}
             disabled={!isSubmitting}
-            className="h-11 w-full rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-700 hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600"
+            variant="secondary"
+            className="w-full sm:w-auto"
           >
             Cancel
-          </button>
+          </Button>
         </div>
-      </form>
+        </form>
+      </Card>
 
       {afterUpload ? <div>{afterUpload}</div> : null}
 
       {lastImport && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700 shadow-sm sm:px-5 sm:py-5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Last import
-          </div>
+        <Card className="px-4 py-4 text-sm text-slate-700 sm:px-5 sm:py-5 dark:text-slate-200">
+          <Label>Last import</Label>
           <div className="mt-2 grid gap-1">
             <div>
               {lastImport.createdAt ? new Date(lastImport.createdAt).toLocaleString() : "--"} - {lastImport.filename}
@@ -174,7 +186,7 @@ export function ImportForm({ lastImport, afterUpload }: ImportFormProps) {
               <div className="text-rose-600 dark:text-rose-300">Error: {lastImport.error}</div>
             )}
           </div>
-        </div>
+        </Card>
       )}
 
       {error && (

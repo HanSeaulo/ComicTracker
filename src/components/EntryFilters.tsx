@@ -3,6 +3,11 @@
 import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EntryStatus, EntryType } from "@prisma/client";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Label } from "@/components/ui/Label";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -51,11 +56,11 @@ function FilterControls({
   mobile = false,
 }: FilterControlsProps) {
   const fieldClass =
-    "h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100";
+    "w-full sm:w-auto";
 
   return (
     <div className={mobile ? "grid gap-3" : "hidden items-center gap-3 sm:flex"}>
-      <select
+      <Select
         name="type"
         value={typeParam}
         onChange={(event) => onTypeChange(event.target.value)}
@@ -67,8 +72,8 @@ function FilterControls({
             {typeLabels[value]}
           </option>
         ))}
-      </select>
-      <select
+      </Select>
+      <Select
         name="status"
         value={statusParam}
         onChange={(event) => onStatusChange(event.target.value)}
@@ -80,8 +85,8 @@ function FilterControls({
             {statusLabels[value]}
           </option>
         ))}
-      </select>
-      <select
+      </Select>
+      <Select
         name="sort"
         value={sortParam}
         onChange={(event) => onSortChange(event.target.value)}
@@ -92,14 +97,10 @@ function FilterControls({
         <option value="chapters">Sort: Chapters Read</option>
         <option value="progress">Sort: Progress %</option>
         <option value="created">Sort: Date Created</option>
-      </select>
-      <button
-        type="button"
-        onClick={onReset}
-        className="h-11 rounded-full border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-600"
-      >
+      </Select>
+      <Button type="button" variant="secondary" onClick={onReset}>
         Reset
-      </button>
+      </Button>
     </div>
   );
 }
@@ -152,24 +153,25 @@ export function EntryFilters() {
 
   return (
     <>
-      <div className="rounded-2xl bg-white p-3 shadow-sm sm:p-4 dark:bg-slate-900">
+      <Card className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
+          <Input
             name="q"
             key={queryParam}
             defaultValue={queryParam}
             onChange={(event) => handleQueryChange(event.target.value)}
             placeholder="Search titles..."
-            className="h-11 min-w-[220px] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className="min-w-[220px] flex-1"
           />
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => setIsMobileOpen(true)}
-            className="h-11 rounded-full border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 sm:hidden dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-600"
+            className="sm:hidden"
           >
             Filters{activeCount > 0 ? ` (${activeCount})` : ""}
-          </button>
+          </Button>
 
           <FilterControls
             typeParam={typeParam}
@@ -181,7 +183,7 @@ export function EntryFilters() {
             onReset={handleReset}
           />
         </div>
-      </div>
+      </Card>
 
       {isMobileOpen ? (
         <div
@@ -193,16 +195,15 @@ export function EntryFilters() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                Filters
-              </h2>
-              <button
+              <Label>Filters</Label>
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => setIsMobileOpen(false)}
-                className="h-10 rounded-full border border-slate-200 px-4 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-100"
               >
                 Done
-              </button>
+              </Button>
             </div>
 
             <FilterControls

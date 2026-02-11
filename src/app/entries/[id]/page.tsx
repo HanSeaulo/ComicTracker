@@ -6,6 +6,10 @@ import { addAltTitle } from "@/app/actions";
 import { DeleteEntryButton, RemoveAltTitleButton } from "@/components/EntryDeleteActions";
 import { ChapterButtons } from "@/components/ChapterButtons";
 import { AppHeader } from "@/components/AppHeader";
+import { Button, buttonClasses } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -91,7 +95,7 @@ export default async function EntryDetailPage({
       <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <AppHeader title={entry.title} showBack />
 
-        <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900">
+        <Card className="p-4 sm:p-6">
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</dt>
@@ -117,7 +121,7 @@ export default async function EntryDetailPage({
                 {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
               </dd>
               <div className="mt-2">
-                <ChapterButtons entryId={entry.id} />
+                <ChapterButtons entryId={entry.id} currentChapters={entry.chaptersRead} />
               </div>
             </div>
             <div>
@@ -158,17 +162,17 @@ export default async function EntryDetailPage({
                   action={addAltTitle.bind(null, entry.id)}
                   className="flex flex-wrap items-center gap-2"
                 >
-                  <input
+                  <Input
                     name="altTitle"
                     placeholder="New alternate title"
-                    className="min-w-[220px] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="min-w-[220px] flex-1"
                   />
-                  <button
+                  <Button
                     type="submit"
-                    className="h-11 rounded-full bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                    variant="primary"
                   >
                     Add
-                  </button>
+                  </Button>
                 </form>
               </dd>
             </div>
@@ -176,20 +180,18 @@ export default async function EntryDetailPage({
 
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
             <Link
-              className="inline-flex h-11 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              className={buttonClasses({ variant: "secondary" })}
               href={`/entries/${entry.id}/edit`}
             >
               Edit
             </Link>
-            <DeleteEntryButton entryId={entry.id} />
+            <DeleteEntryButton entryId={entry.id} className={buttonClasses({ variant: "destructive" })} />
           </div>
-        </div>
+        </Card>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
+        <Card className="mt-6 p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Recent Changes
-            </h2>
+            <Label>Recent Changes</Label>
             <Link className="text-xs font-semibold text-slate-600 dark:text-slate-300" href="/activity">
               View all
             </Link>
@@ -214,7 +216,7 @@ export default async function EntryDetailPage({
               </div>
             ))}
           </div>
-        </section>
+        </Card>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { ImportForm } from "@/components/ImportForm";
 import { AppHeader } from "@/components/AppHeader";
+import { buttonClasses } from "@/components/ui/Button";
 
 export default async function ImportPage() {
   const lastImport = await db.importRun.findFirst({
@@ -31,7 +32,7 @@ export default async function ImportPage() {
           lastImport={lastImportSummary}
           afterUpload={
             <Link
-              className="inline-flex h-11 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              className={buttonClasses({ variant: "secondary" })}
               href="/imports"
             >
               Import history

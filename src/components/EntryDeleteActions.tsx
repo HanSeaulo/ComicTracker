@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { deleteEntry, removeAltTitle } from "@/app/actions";
 import { ConfirmActionButton, ConfirmDialog } from "@/components/ConfirmDialog";
+import { buttonClasses } from "@/components/ui/Button";
 
-export function DeleteEntryButton({ entryId }: { entryId: string }) {
+export function DeleteEntryButton({ entryId, className }: { entryId: string; className?: string }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +22,7 @@ export function DeleteEntryButton({ entryId }: { entryId: string }) {
     <>
       <ConfirmActionButton
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 items-center rounded-full bg-rose-600 px-4 text-sm font-semibold text-white hover:bg-rose-500 dark:bg-rose-500 dark:hover:bg-rose-400"
+        className={className ?? buttonClasses({ variant: "destructive" })}
       >
         Delete
       </ConfirmActionButton>

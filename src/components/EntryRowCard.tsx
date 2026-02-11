@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ChapterButtons } from "@/components/ChapterButtons";
+import { Card } from "@/components/ui/Card";
 
 type EntryRowCardProps = {
   entryId: string;
@@ -27,7 +28,7 @@ export function EntryRowCard({
   };
 
   return (
-    <div
+    <Card
       role="button"
       tabIndex={0}
       onClick={openEntry}
@@ -37,7 +38,7 @@ export function EntryRowCard({
           openEntry();
         }
       }}
-      className="group grid cursor-pointer grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-sm shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800/60"
+      className="group grid cursor-pointer grid-cols-[1fr_auto] items-center gap-3 p-3 text-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.99] sm:p-3 dark:hover:border-slate-700 dark:hover:bg-slate-800/60"
     >
       <div className="min-w-0">
         <div className="line-clamp-2 text-base font-semibold text-slate-900 dark:text-slate-100">
@@ -48,9 +49,9 @@ export function EntryRowCard({
         </div>
       </div>
       <div className="rounded-full border border-slate-200 bg-white/70 p-1 dark:border-slate-700 dark:bg-slate-900/70">
-        <ChapterButtons entryId={entryId} />
+        <ChapterButtons entryId={entryId} currentChapters={chaptersRead} />
       </div>
-    </div>
+    </Card>
   );
 }
 

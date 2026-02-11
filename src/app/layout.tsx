@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PwaRegister } from "@/components/PwaRegister";
 import { Signature } from "@/components/Signature";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -66,7 +67,7 @@ export default function RootLayout({
       >
         <ThemeProvider />
         <PwaRegister />
-        {children}
+        <ToastProvider>{children}</ToastProvider>
         <Signature />
       </body>
     </html>

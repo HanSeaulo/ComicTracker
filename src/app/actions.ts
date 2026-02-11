@@ -464,15 +464,15 @@ export async function removeAltTitle(entryId: string, altTitleId: string) {
 
 export async function incrementChapters(entryId: string, delta: number) {
   await requireAuth();
-  await db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const current = await tx.entry.findUnique({
       where: { id: entryId },
       select: { chaptersRead: true, title: true },
     });
-    if (!current) return;
+    if (!current) return null;
     const currentValue = current.chaptersRead ?? 0;
     const next = Math.max(0, currentValue + delta);
-    if (next === currentValue) return;
+    if (next === currentValue) return { from: currentValue, to: next };
 
     await tx.entry.update({
       where: { id: entryId },
@@ -485,12 +485,15 @@ export async function incrementChapters(entryId: string, delta: number) {
       changes: {
         chaptersRead: { from: currentValue, to: next },
       } as ActivityChanges,
-      message: `Updated chapters for ${current.title}`,
-      source: "chapters",
+        message: `Updated chapters for ${current.title}`,
+        source: "chapters",
     });
+
+    return { from: currentValue, to: next };
   });
   revalidatePath("/");
   revalidatePath(`/entries/${entryId}`);
+  return result;
 }
 
 function normalizeRowType(sheetName: string): EntryType | null {
