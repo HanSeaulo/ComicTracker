@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ImportForm } from "@/components/ImportForm";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function ImportPage() {
   const lastImport = await db.importRun.findFirst({
@@ -35,6 +36,7 @@ export default async function ImportPage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/imports">
               Import history
             </Link>

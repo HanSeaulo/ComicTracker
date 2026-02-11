@@ -4,6 +4,7 @@ import { EntryStatus, EntryType, Prisma } from "@prisma/client";
 import { EntryFilters } from "@/components/EntryFilters";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ChapterButtons } from "@/components/ChapterButtons";
+import { LogoutButton } from "@/components/LogoutButton";
 
 type SearchParams = {
   q?: string;
@@ -132,6 +133,7 @@ export default async function Home({
           </div>
           <div className="flex flex-wrap gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
               href="/import"

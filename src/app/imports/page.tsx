@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 function formatDuration(ms: number) {
   if (!Number.isFinite(ms)) return "--";
@@ -30,6 +31,7 @@ export default async function ImportsPage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/import">
               Import
             </Link>

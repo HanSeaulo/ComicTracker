@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EntryForm } from "@/components/EntryForm";
 import { createEntry } from "@/app/actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default function NewEntryPage() {
   return (
@@ -16,6 +17,7 @@ export default function NewEntryPage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
               Back to list
             </Link>

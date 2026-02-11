@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { EntryForm } from "@/components/EntryForm";
 import { updateEntry } from "@/app/actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function EditEntryPage({
   params,
@@ -26,6 +27,7 @@ export default async function EditEntryPage({
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href={`/entries/${entry.id}`}>
               Back to details
             </Link>

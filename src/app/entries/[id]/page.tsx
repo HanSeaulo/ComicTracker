@@ -6,6 +6,7 @@ import { addAltTitle } from "@/app/actions";
 import { DeleteEntryButton, RemoveAltTitleButton } from "@/components/EntryDeleteActions";
 import { ChapterButtons } from "@/components/ChapterButtons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
@@ -98,6 +99,7 @@ export default async function EntryDetailPage({
           </div>
           <div className="flex gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
               href={`/entries/${entry.id}/edit`}

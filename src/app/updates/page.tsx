@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { EntryStatus } from "@prisma/client";
 import { ChapterButtons } from "@/components/ChapterButtons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function UpdatesPage() {
   const recentEntries = await db.entry.findMany({
@@ -31,6 +32,7 @@ export default async function UpdatesPage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <LogoutButton />
             <Link className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300" href="/">
               Back to library
             </Link>

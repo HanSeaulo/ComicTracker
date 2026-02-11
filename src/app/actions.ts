@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import { db } from "@/lib/db";
 import { EntryStatus, EntryType, ImportStatus, ActivityAction, Prisma } from "@prisma/client";
 import { parseImportedTitle, PAREN_KEEP_KEYWORDS } from "@/lib/titleParsing";
+import { requireAuth } from "@/lib/auth";
 
 type ParsedEntry = {
   title: string;
@@ -249,6 +250,7 @@ function parseEntryFromForm(formData: FormData): ParsedEntry {
 }
 
 export async function createEntry(formData: FormData) {
+  await requireAuth();
   const data = parseEntryFromForm(formData);
   const { altTitles, ...entryData } = data;
   const entry = await db.$transaction(async (tx) => {
@@ -286,6 +288,7 @@ export async function createEntry(formData: FormData) {
 }
 
 export async function updateEntry(id: string, formData: FormData) {
+  await requireAuth();
   const data = parseEntryFromForm(formData);
   const { altTitles, ...entryData } = data;
   const altTitlesProvided = altTitles.length > 0;
@@ -366,6 +369,7 @@ export async function updateEntry(id: string, formData: FormData) {
 }
 
 export async function deleteEntry(id: string) {
+  await requireAuth();
   await db.$transaction(async (tx) => {
     const existing = await tx.entry.findUnique({
       where: { id },
@@ -393,6 +397,7 @@ export async function deleteEntry(id: string) {
 }
 
 export async function addAltTitle(entryId: string, formData: FormData) {
+  await requireAuth();
   const rawTitle = normalizeString(formData.get("altTitle"));
   if (!rawTitle) {
     throw new Error("Alternate title is required.");
@@ -431,6 +436,7 @@ export async function addAltTitle(entryId: string, formData: FormData) {
 }
 
 export async function removeAltTitle(entryId: string, altTitleId: string) {
+  await requireAuth();
   await db.$transaction(async (tx) => {
     const existing = await tx.altTitle.findUnique({
       where: { id: altTitleId },
@@ -457,6 +463,7 @@ export async function removeAltTitle(entryId: string, altTitleId: string) {
 }
 
 export async function incrementChapters(entryId: string, delta: number) {
+  await requireAuth();
   await db.$transaction(async (tx) => {
     const current = await tx.entry.findUnique({
       where: { id: entryId },
@@ -505,6 +512,7 @@ export type ImportResult = {
 };
 
 export async function importEntries(formData: FormData): Promise<ImportResult> {
+  await requireAuth();
   const startedAt = Date.now();
   const file = formData.get("file");
   const filename = file instanceof File ? file.name : "unknown";
