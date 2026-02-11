@@ -5,9 +5,8 @@ import { EntryFilters } from "@/components/EntryFilters";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppHeader } from "@/components/AppHeader";
 import { EntryRowCard } from "@/components/EntryRowCard";
-import { Card } from "@/components/ui/Card";
+import { LatestUpdatesPanel } from "@/components/LatestUpdatesPanel";
 import { buttonClasses } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
 
 type SearchParams = {
   q?: string;
@@ -128,12 +127,6 @@ export default async function Home({
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              className={buttonClasses({ variant: "secondary" })}
-              href="/import"
-            >
-              Import .xlsx
-            </Link>
-            <Link
               className={buttonClasses({ variant: "primary" })}
               href="/entries/new"
             >
@@ -144,32 +137,7 @@ export default async function Home({
 
         <EntryFilters />
 
-        <Card className="p-4 sm:p-4">
-          <div className="flex items-center justify-between">
-            <Label>Latest Updates</Label>
-            <Link className="text-xs font-semibold text-slate-600 dark:text-slate-300" href="/updates">
-              View all
-            </Link>
-          </div>
-          <div className="mt-4 space-y-3">
-            {recentSorted.map((entry) => (
-              <div
-                key={entry.id}
-                className="rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:text-slate-200"
-              >
-                <Link
-                  className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
-                  href={`/entries/${entry.id}`}
-                >
-                  {entry.title}
-                </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {entry.chaptersRead ?? "--"} / {entry.totalChapters ?? "--"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <LatestUpdatesPanel updates={recentSorted} />
 
         {showImportMessage && (
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">

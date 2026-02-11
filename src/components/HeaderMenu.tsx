@@ -1,11 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { autofillMissingCoversSafe } from "@/app/actions/coverAutofill";
+import { useToast } from "@/components/ui/Toast";
 
 export function HeaderMenu() {
   const [open, setOpen] = useState(false);
+  const [isAutofilling, setIsAutofilling] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!open) return;
@@ -37,6 +42,35 @@ export function HeaderMenu() {
     }
   };
 
+  const onAutofill = async () => {
+    const confirmed = window.confirm(
+      "This will try to fill missing covers using AniList and skip unclear matches. It can take around 30 seconds per run. Continue?",
+    );
+    if (!confirmed) return;
+
+    setOpen(false);
+    setIsAutofilling(true);
+    try {
+      const summary = await autofillMissingCoversSafe({ limit: 30 });
+      toast({
+        title: "Auto-fill complete",
+        description: `Updated ${summary.updated}, skipped ${summary.skipped}, failed ${summary.failed}, scanned ${summary.scanned} in ${summary.durationSeconds}s.`,
+        variant: "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Auto-fill failed",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setIsAutofilling(false);
+    }
+  };
+
+  const menuItemClass =
+    "block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800";
+
   return (
     <div className="relative">
       <button
@@ -67,13 +101,31 @@ export function HeaderMenu() {
         <div
           ref={menuRef}
           role="menu"
-          className="absolute right-0 z-20 mt-2 min-w-40 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          className="absolute right-0 z-20 mt-2 min-w-48 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
         >
+          <Link href="/import" role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
+            Import .xlsx
+          </Link>
+          <Link href="/imports" role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
+            Import history
+          </Link>
+          <Link href="/activity" role="menuitem" onClick={() => setOpen(false)} className={menuItemClass}>
+            Activity
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={onAutofill}
+            disabled={isAutofilling}
+            className={menuItemClass}
+          >
+            {isAutofilling ? "Auto-filling covers..." : "Auto-fill covers (safe)"}
+          </button>
           <button
             type="button"
             role="menuitem"
             onClick={onLogout}
-            className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800"
+            className={menuItemClass}
           >
             Logout
           </button>
