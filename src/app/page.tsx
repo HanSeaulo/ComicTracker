@@ -124,24 +124,25 @@ export default async function Home({
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
         <AppHeader
           title="Library"
-          actions={
-            <>
-              <ThemeToggle />
-              <Link
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
-                href="/import"
-              >
-                Import .xlsx
-              </Link>
-              <Link
-                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
-                href="/entries/new"
-              >
-                Add Entry
-              </Link>
-            </>
-          }
         />
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ThemeToggle />
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              href="/import"
+            >
+              Import .xlsx
+            </Link>
+            <Link
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+              href="/entries/new"
+            >
+              Add Entry
+            </Link>
+          </div>
+        </div>
 
         <EntryFilters />
 
