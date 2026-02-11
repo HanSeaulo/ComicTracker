@@ -11,7 +11,14 @@ const withPWA = nextPwa({
   register: false,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-  runtimeCaching,
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }) =>
+        request.mode === "navigate" || request.destination === "document",
+      handler: "NetworkOnly",
+    },
+    ...runtimeCaching,
+  ],
 });
 
 export default withPWA(nextConfig);

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type LogoutButtonProps = {
@@ -8,7 +7,6 @@ type LogoutButtonProps = {
 };
 
 export function LogoutButton({ className }: LogoutButtonProps) {
-  const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 
   const onLogout = async () => {
@@ -17,9 +15,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
-      router.push("/login");
-      router.refresh();
-      setIsPending(false);
+      window.location.href = "/login";
     }
   };
 
