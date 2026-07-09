@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comictracker
+  labels:
+    app: comictracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comictracker
+  template:
+    metadata:
+      labels:
+        app: comictracker
+    spec:
+      containers:
+        - name: comictracker
+          image: comictracker:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: comictracker-config
+            - secretRef:
+                name: comictracker-secret
