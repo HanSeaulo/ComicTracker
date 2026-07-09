@@ -4,6 +4,8 @@ import { ImportForm } from "@/components/ImportForm";
 import { AppHeader } from "@/components/AppHeader";
 import { buttonClasses } from "@/components/ui/Button";
 
+export const dynamic = "force-dynamic";
+
 export default async function ImportPage() {
   const lastImport = await db.importRun.findFirst({
     orderBy: { createdAt: "desc" },

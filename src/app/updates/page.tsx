@@ -3,6 +3,8 @@ import { EntryStatus, EntryType } from "@prisma/client";
 import { AppHeader } from "@/components/AppHeader";
 import { EntryListRow } from "@/components/EntryListRow";
 
+export const dynamic = "force-dynamic";
+
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
   MANHUA: "Manhua",

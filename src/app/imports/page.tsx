@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { AppHeader } from "@/components/AppHeader";
 
+export const dynamic = "force-dynamic";
+
 function formatDuration(ms: number) {
   if (!Number.isFinite(ms)) return "--";
   if (ms < 1000) return `${ms} ms`;

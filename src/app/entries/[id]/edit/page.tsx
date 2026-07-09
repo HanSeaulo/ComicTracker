@@ -4,6 +4,8 @@ import { EntryForm } from "@/components/EntryForm";
 import { updateEntry } from "@/app/actions";
 import { AppHeader } from "@/components/AppHeader";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditEntryPage({
   params,
 }: {

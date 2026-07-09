@@ -8,6 +8,8 @@ import { EntryRowCard } from "@/components/EntryRowCard";
 import { LatestUpdatesPanel } from "@/components/LatestUpdatesPanel";
 import { buttonClasses } from "@/components/ui/Button";
 
+export const dynamic = "force-dynamic";
+
 type SearchParams = {
   q?: string;
   status?: string;

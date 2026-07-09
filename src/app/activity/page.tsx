@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { AppHeader } from "@/components/AppHeader";
 import { ActivityAction, Prisma } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 function formatValue(value: unknown) {
   if (value === null || value === undefined) return "--";
   if (typeof value === "string") return value;

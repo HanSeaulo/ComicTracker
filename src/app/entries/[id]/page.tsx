@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/Label";
 import { EntryCoverTools } from "@/components/covers/EntryCoverTools";
 import { EntrySourceTitlesSection } from "@/components/covers/EntrySourceTitlesSection";
 
+export const dynamic = "force-dynamic";
+
 const typeLabels: Record<EntryType, string> = {
   MANHWA: "Manhwa",
   MANHUA: "Manhua",
