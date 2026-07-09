@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: comictracker:local
+    container_name: comictracker-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env.docker.local
+        required: true
+        format: raw
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    restart: unless-stopped
